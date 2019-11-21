@@ -12,7 +12,7 @@ public class NumberConstants {
 
     //Cargo constants
     public static final double CARGO_POWER = 0.7;
-    public static final double ROCKET_POWER = 1;
+    public static final double ROCKET_POWER = 0.5;
     //Encoder constants
     public static final double DISTANCE_PER_PULSE = 0.03;
     public static final double ENCODER_ERROR_CONSTANT = 5;

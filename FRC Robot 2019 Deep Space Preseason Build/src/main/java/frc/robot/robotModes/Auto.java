@@ -21,7 +21,7 @@ public class Auto extends CommandGroup
 	public Auto()
 	{
 		// addSequential(new AutoDrive(NumberConstants.AUTO_SPEED, 0), 1*meterTime);
-		addSequential(new AutoHatch("claw", true));
+		// addSequential(new AutoHatch("claw", true));
 		addParallel(new CargoManager());
         addParallel(new HatchManager());
         addParallel(new TeleDrive());

@@ -33,15 +33,15 @@ public class CargoManager extends Command {
   protected void execute() {
     //button 7 is left, button 8 is right
     if (OI.XBoxControllerSubsystem.getBumper(Hand.kLeft)) {
-      Robot.cargoSubsystem.inTakeRocket();
+      Robot.cargoSubsystem.inTakeCargo();
     }
     else if (OI.XBoxControllerSubsystem.getBumper(Hand.kRight)) {
-      Robot.cargoSubsystem.outTakeRocket();
+      Robot.cargoSubsystem.outTakeCargo();
     }
     else if (OI.XBoxControllerSubsystem.getRawButton(7)) {
-      Robot.cargoSubsystem.inTakeCargo();
+      Robot.cargoSubsystem.inTakeRocket();
     } else if (OI.XBoxControllerSubsystem.getRawButton(8)) {
-      Robot.cargoSubsystem.outTakeCargo();
+      Robot.cargoSubsystem.outTakeRocket();
     }
     else {
       Robot.cargoSubsystem.idle();

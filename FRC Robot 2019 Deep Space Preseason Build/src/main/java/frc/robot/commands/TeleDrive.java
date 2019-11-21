@@ -28,7 +28,8 @@ public class TeleDrive extends Command {
   enum DriveMode {
     FAST,
     MEDIUM,
-    SLOW
+    SLOW,
+    SUPERSLOW
   }
 
   public TeleDrive() {
@@ -58,12 +59,18 @@ public class TeleDrive extends Command {
       case SLOW:
         driveMode = DriveMode.MEDIUM;
         break;
+      case SUPERSLOW:
+        driveMode = DriveMode.SLOW;
+        break;
     default:
       break;
       }
     }
     if(OI.XBoxControllerDriver.getBButtonPressed()) { // B speeds OI.JoyStickRight.getRawButtonPressed(4) || 
       switch(driveMode) {
+      case SLOW:
+        driveMode = DriveMode.SUPERSLOW;
+        break;
       case MEDIUM:
         driveMode = DriveMode.SLOW;
         break;
@@ -87,6 +94,10 @@ public class TeleDrive extends Command {
     		case SLOW:
           slowMod = NumberConstants.SLOWING_CONSTANT;
           SmartDashboard.putString("Mode:", "SLOW");
+          break;
+        case SUPERSLOW:
+          slowMod = NumberConstants.SLOWING_CONSTANT*1.5;
+          SmartDashboard.putString("Mode:", "SUPERSLOW");
     			break;
     		default:
           slowMod = 1;

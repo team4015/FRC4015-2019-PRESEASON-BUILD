@@ -1,4 +1,4 @@
-/*package frc.robot.geraldangery;
+package frc.robot.subsystems;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.HashMap;
+
+import edu.wpi.first.vision.VisionPipeline;
 
 import org.opencv.core.*;
 import org.opencv.core.Core.*;
@@ -23,11 +25,13 @@ import org.opencv.objdetect.*;
 *
 * @author GRIP
 */
-//public class GripPipeline {
+//Must implment the new interface of VisionPipeline from import edu.wpi.first.vision.VisionPipeline;
+public class GripPipeline implements VisionPipeline {
 
 	//Outputs
-	/*
-	private Mat hslThresholdOutput = new Mat();
+	private Mat hsvThresholdOutput = new Mat();
+	private Mat cvErodeOutput = new Mat();
+	private Mat maskOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
 
@@ -38,49 +42,79 @@ import org.opencv.objdetect.*;
 	/**
 	 * This is the primary method that runs the entire pipeline and updates the outputs.
 	 */
-	/*public void process(Mat source0) {
-		// Step HSL_Threshold0:
-		Mat hslThresholdInput = source0;
-		double[] hslThresholdHue = {64.46043165467626, 180.0};
-		double[] hslThresholdSaturation = {198.67805755395685, 255.0};
-		double[] hslThresholdLuminance = {161.98741007194246, 244.1211604095563};
-		hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance, hslThresholdOutput);
-		
+	@Override	public void process(Mat source0) {
+		// Step HSV_Threshold0:
+		Mat hsvThresholdInput = source0;
+		double[] hsvThresholdHue = {91.67784416534568, 130.85324232081913};
+		double[] hsvThresholdSaturation = {78.23132702339961, 217.45386366985042};
+		double[] hsvThresholdValue = {0.0, 167.9692832764505};
+		hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
+
+		// Step CV_erode0:
+		Mat cvErodeSrc = hsvThresholdOutput;
+		Mat cvErodeKernel = new Mat();
+		Point cvErodeAnchor = new Point(-1, -1);
+		double cvErodeIterations = 1.0;
+		int cvErodeBordertype = Core.BORDER_CONSTANT;
+		Scalar cvErodeBordervalue = new Scalar(-1);
+		cvErode(cvErodeSrc, cvErodeKernel, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue, cvErodeOutput);
+
+		// Step Mask0:
+		Mat maskInput = source0;
+		Mat maskMask = cvErodeOutput;
+		mask(maskInput, maskMask, maskOutput);
+
 		// Step Find_Contours0:
-		Mat findContoursInput = hslThresholdOutput;
+		Mat findContoursInput = cvErodeOutput;
 		boolean findContoursExternalOnly = false;
 		findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
 
 		// Step Filter_Contours0:
 		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-		double filterContoursMinArea = 30.0;
-		double filterContoursMinPerimeter = 0.0;
-		double filterContoursMinWidth = 0.0;
+		double filterContoursMinArea = 400.0;
+		double filterContoursMinPerimeter = 80.0;
+		double filterContoursMinWidth = 20.0;
 		double filterContoursMaxWidth = 1000.0;
-		double filterContoursMinHeight = 0.0;
+		double filterContoursMinHeight = 5.0;
 		double filterContoursMaxHeight = 1000.0;
-		double[] filterContoursSolidity = {54.85611510791367, 100};
-		double filterContoursMaxVertices = 1000000.0;
+		double[] filterContoursSolidity = {0, 100};
+		double filterContoursMaxVertices = 10000.0;
 		double filterContoursMinVertices = 0.0;
 		double filterContoursMinRatio = 0.0;
 		double filterContoursMaxRatio = 1000.0;
 		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
-		
+
 	}
 
 	/**
-	 * This method is a generated getter for the output of a HSL_Threshold.
-	 * @return Mat output from HSL_Threshold.
+	 * This method is a generated getter for the output of a HSV_Threshold.
+	 * @return Mat output from HSV_Threshold.
 	 */
-	/*public Mat hslThresholdOutput() {
-		return hslThresholdOutput;
+	public Mat hsvThresholdOutput() {
+		return hsvThresholdOutput;
+	}
+
+	/**
+	 * This method is a generated getter for the output of a CV_erode.
+	 * @return Mat output from CV_erode.
+	 */
+	public Mat cvErodeOutput() {
+		return cvErodeOutput;
+	}
+
+	/**
+	 * This method is a generated getter for the output of a Mask.
+	 * @return Mat output from Mask.
+	 */
+	public Mat maskOutput() {
+		return maskOutput;
 	}
 
 	/**
 	 * This method is a generated getter for the output of a Find_Contours.
 	 * @return ArrayList<MatOfPoint> output from Find_Contours.
 	 */
-	/*public ArrayList<MatOfPoint> findContoursOutput() {
+	public ArrayList<MatOfPoint> findContoursOutput() {
 		return findContoursOutput;
 	}
 
@@ -88,25 +122,61 @@ import org.opencv.objdetect.*;
 	 * This method is a generated getter for the output of a Filter_Contours.
 	 * @return ArrayList<MatOfPoint> output from Filter_Contours.
 	 */
-	/*public ArrayList<MatOfPoint> filterContoursOutput() {
+	public ArrayList<MatOfPoint> filterContoursOutput() {
 		return filterContoursOutput;
 	}
 
 
 	/**
-	 * Segment an image based on hue, saturation, and luminance ranges.
+	 * Segment an image based on hue, saturation, and value ranges.
 	 *
 	 * @param input The image on which to perform the HSL threshold.
 	 * @param hue The min and max hue
 	 * @param sat The min and max saturation
-	 * @param lum The min and max luminance
+	 * @param val The min and max value
 	 * @param output The image in which to store the output.
 	 */
-	/*private void hslThreshold(Mat input, double[] hue, double[] sat, double[] lum,
-		Mat out) {
-		Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HLS);
-		Core.inRange(out, new Scalar(hue[0], lum[0], sat[0]),
-			new Scalar(hue[1], lum[1], sat[1]), out);
+	private void hsvThreshold(Mat input, double[] hue, double[] sat, double[] val,
+	    Mat out) {
+		Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HSV);
+		Core.inRange(out, new Scalar(hue[0], sat[0], val[0]),
+			new Scalar(hue[1], sat[1], val[1]), out);
+	}
+
+	/**
+	 * Expands area of lower value in an image.
+	 * @param src the Image to erode.
+	 * @param kernel the kernel for erosion.
+	 * @param anchor the center of the kernel.
+	 * @param iterations the number of times to perform the erosion.
+	 * @param borderType pixel extrapolation method.
+	 * @param borderValue value to be used for a constant border.
+	 * @param dst Output Image.
+	 */
+	private void cvErode(Mat src, Mat kernel, Point anchor, double iterations,
+		int borderType, Scalar borderValue, Mat dst) {
+		if (kernel == null) {
+			kernel = new Mat();
+		}
+		if (anchor == null) {
+			anchor = new Point(-1,-1);
+		}
+		if (borderValue == null) {
+			borderValue = new Scalar(-1);
+		}
+		Imgproc.erode(src, dst, kernel, anchor, (int)iterations, borderType, borderValue);
+	}
+
+	/**
+	 * Filter out an area of an image using a binary mask.
+	 * @param input The image on which the mask filters.
+	 * @param mask The binary image that is used to filter.
+	 * @param output The image in which to store the output.
+	 */
+	private void mask(Mat input, Mat mask, Mat output) {
+		mask.convertTo(mask, CvType.CV_8UC1);
+		Core.bitwise_xor(output, output, output);
+		input.copyTo(output, mask);
 	}
 
 	/**
@@ -116,7 +186,7 @@ import org.opencv.objdetect.*;
 	 * @param maskSize the size of the mask.
 	 * @param output The image in which to store the output.
 	 */
-	/*private void findContours(Mat input, boolean externalOnly,
+	private void findContours(Mat input, boolean externalOnly,
 		List<MatOfPoint> contours) {
 		Mat hierarchy = new Mat();
 		contours.clear();
@@ -148,7 +218,7 @@ import org.opencv.objdetect.*;
 	 * @param minRatio minimum ratio of width to height
 	 * @param maxRatio maximum ratio of width to height
 	 */
-	/*private void filterContours(List<MatOfPoint> inputContours, double minArea,
+	private void filterContours(List<MatOfPoint> inputContours, double minArea,
 		double minPerimeter, double minWidth, double maxWidth, double minHeight, double
 		maxHeight, double[] solidity, double maxVertexCount, double minVertexCount, double
 		minRatio, double maxRatio, List<MatOfPoint> output) {
@@ -184,4 +254,3 @@ import org.opencv.objdetect.*;
 
 
 }
-*/

@@ -46,7 +46,8 @@ public class Robot extends TimedRobot {
 
   public static UsbCamera cameraA;
   public static UsbCamera cameraB;
-
+  private static final int IMG_WIDTH = 320;
+	private static final int IMG_HEIGHT = 240;
   public static CvSink AIAssist;
   public static CargoSubsystem cargoSubsystem;
   public static HatchSubsystem hatchSubsystem;
@@ -72,8 +73,8 @@ public class Robot extends TimedRobot {
     cameraB = CameraServer.getInstance().startAutomaticCapture(1);
     cameraA.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
     cameraB.setConnectionStrategy(ConnectionStrategy.kKeepOpen);
-    cameraA.setResolution(160, 120);
-    cameraB.setResolution(160, 120);
+    cameraA.setResolution(IMG_WIDTH,IMG_HEIGHT);
+    cameraB.setResolution(160,120);
    // outputStream = CameraServer.getInstance().putVideo("CV Output", , 480);
     cargoSubsystem = new CargoSubsystem();
     hatchSubsystem = new HatchSubsystem();
@@ -81,10 +82,6 @@ public class Robot extends TimedRobot {
     teleop = new Teleop();
     auto = new Auto();
     rangeFinder = new Rangefinder();
-    //visionThread = new VisionThread(cameraServer, new TapeSensorMKII(), tapeSensor -> {
-        //GeraldLiterallyLosesHisMind.getLineAngles(tapeSensor.hslThresholdOutput());
-       // outputStream.putFrame(tapeSensor.hslThresholdOutput());
-    //});
 
   }
 
@@ -129,10 +126,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
    // m_autonomousCommand = m_chooser.getSelected();
-    //teleop = new Teleop();
     auto.start();
-    // teleop.start();
-    // hatchSubsystem.initForStart();
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
      * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
